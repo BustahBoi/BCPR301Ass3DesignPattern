@@ -26,6 +26,12 @@ class Subject(metaclass=ABCMeta):
         self.input = arg
         self.notify()
 
+    def get_command(self):
+        return self.command
+
+    def get_input(self):
+        return self.input
+
 
 class Prompt(Cmd, Subject):
 

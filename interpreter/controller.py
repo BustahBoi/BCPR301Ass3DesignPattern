@@ -12,14 +12,6 @@ class Observer(metaclass=ABCMeta):
     def update(self):
         pass
 
-    @abstractmethod
-    def get_command(self):
-        pass
-
-    @abstractmethod
-    def get_input(self):
-        pass
-
 
 class Controller(Observer):
     def __init__(self, prompt, database, filehandler, graph):
@@ -36,10 +28,10 @@ class Controller(Observer):
         self.subject.cmdloop()
 
     def get_command(self):
-        return self.subject.command
+        return self.subject.get_command()
 
     def get_input(self):
-        return self.subject.input
+        return self.subject.get_input()
 
     def update(self):
         self.command = self.get_command()
