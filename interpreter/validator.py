@@ -1,49 +1,149 @@
 import re
 from copy import deepcopy
+from abc import ABCMeta, abstractmethod
+
+
+class Strategy(metaclass=ABCMeta):
+
+    @abstractmethod
+    def check(self, data):
+        pass
+
+
+class CheckID(Strategy):
+
+    def check(self, data):
+        data = str(data)
+        reg_exp = "^[A-Z][\d]{3}$"
+        match = re.match(reg_exp, data)
+        if match:
+            return data
+        else:
+            return False
+
+
+class CheckSales(Strategy):
+
+    def check(self, data):
+        data = str(data)
+        reg_exp = "^[\d]{3}$"
+        match = re.match(reg_exp, data)
+        if match:
+            return data
+        else:
+            return False
+
+
+class CheckSalary(Strategy):
+
+    def check(self, data):
+        data = str(data)
+        reg_exp = "^([\d]{2}|[\d]{3})$"
+        match = re.match(reg_exp, data)
+        if match:
+            return data
+        else:
+            return False
+
+
+class CheckAge(Strategy):
+
+    def check(self, data):
+        data = str(data)
+        reg_exp = "^[\d]{2}$"
+        match = re.match(reg_exp, data)
+        if match:
+            return data
+        else:
+            return False
+
+
+class CheckGender(Strategy):
+
+    def check(self, data):
+        data = str(data)
+        reg_exp = "^(M|F)$"
+        match = re.match(reg_exp, data)
+        if match:
+            return data
+        else:
+            male = re.match("((m|M)ale)$", data)
+            if male:
+                return "M"
+            female = re.match("((f|F)emale)$", data)
+            if female:
+                return "F"
+            else:
+                return False
+
+
+class CheckBMI(Strategy):
+
+    def check(self, data):
+        reg_exp = "^(Normal|Overweight|Obesity|Underweight)$"
+        match = re.match(reg_exp, data.capitalize())
+        if match:
+            return data.capitalize()
+        else:
+            return False
+
+
+class CheckBirthday(Strategy):
+
+    def check(self, data):
+        reg_exp = "^(0[1-9]|[1-2][0-9]|3(0|1))(-|/)(0[1-9]|1[0-2])(-|/)(19|20)[0-9]{2}$"
+        match = re.match(reg_exp, data)
+        if match:
+            return data
+        else:
+            match = re.compile("(/|\\|.|:|;|,|_)")
+            if match.search(data):
+                data = match.sub('-', data)
+                return data
+            else:
+                return False
+
+
+class CheckContext:
+    def __init__(self):
+        self.__strategy = None
+
+    def set_strategy(self, strategy):
+        self.__strategy = strategy
+
+    def check(self, value):
+        return self.__strategy.check(value)
 
 
 class Validator:
     def __init__(self):
         self.temp_dict = dict()
         self.valid_dict = dict()
-        self.id = "^[A-Z][\d]{3}$"
-        self.gender = "^(M|F)$"
-        self.age = "^[\d]{2}$"
-        self.sales = "^[\d]{3}$"
-        self.bmi = "^(Normal|Overweight|Obesity|Underweight)$"
-        self.salary = "^([\d]{2}|[\d]{3})$"
-        self.birthday = "^(0[1-9]|[1-2][0-9]|3(0|1))(-|/)(0[1-9]|1[0-2])(-|/)(19|20)[0-9]{2}$"
 
-    def check(self, attr, data):
-        check_attr = getattr(self, attr.lower(), False)
-        data = str(data)
-        result = False
-        if check_attr:
-            match = re.match(check_attr, data)
-            if match:
-                result = data
+    def check(self, key, value):
+        key = key.lower()
+        context = CheckContext()
+        strategy = self.get_strategy(key)
+        if strategy:
+            context.set_strategy(strategy)
+            result = context.check(value)
+            if result:
+                return result
             else:
-                result = self.change_regexp(attr.lower(), data)
-        return result
+                return False
+        else:
+            return False
 
-    def change_regexp(self, attr, data):
-        result = False
-        formatting = {"gender": {"((m|M)ale)$": "M", "((f|F)emale)$": "F"},
-                      "bmi": {"^(normal|overweight|obesity|underweight)$": data.capitalize()},
-                      "birthday": {"(/|\\|.|:|;|,|_)": "/\\.:;,_"}}
+    def get_strategy(self, key):
+        strategies = {"id": CheckID(),
+                      "gender": CheckGender(),
+                      "age": CheckAge(),
+                      "sales": CheckSales(),
+                      "bmi": CheckBMI(),
+                      "salary": CheckSalary(),
+                      "birthday": CheckBirthday()}
         try:
-            new_format = formatting[attr]
-            for key, value in new_format.items():
-                c = re.compile(key)
-                if attr == "birthday" and c.search(data) is not None:
-                    result = c.sub('-', data)
-                    break
-                elif re.match(key, data) is not None:
-                    result = value
-                    break
-                else:
-                    result = False
-            return result
+            return strategies[key]
         except KeyError:
             return False
 
@@ -51,30 +151,28 @@ class Validator:
     def xlsx_date(a_date):
         return a_date.date().strftime("%d-%m-%Y")
 
-    @staticmethod
-    def checker(row):
+    def checker(self, row):
         result = False
         for key, value in row.items():
-            result = a.check(key, value)
+            result = self.check(key, value)
             if result:
-                a.push_value(key, result)
+                self.push_value(key, result)
                 result = True
             else:
                 break
         return result
 
-    @staticmethod
-    def save_dict(loaded_dict):
+    def save_dict(self, loaded_dict):
         for empno, row in loaded_dict.items():
-            b = a.checker(row)
+            b = self.checker(row)
             if b is False:
                 print("Error at entry: " + str(empno))
             else:
-                a.push_row(empno)
-        return a.return_dict()
+                self.push_row(empno)
+        return self.return_dict()
 
-    def push_value(self, key, val):
-        self.temp_dict[key] = val
+    def push_value(self, key, value):
+        self.temp_dict[key] = value
 
     def push_row(self, empno):
         temp = deepcopy(self.temp_dict)
@@ -84,6 +182,3 @@ class Validator:
 
     def return_dict(self):
         return self.valid_dict
-
-
-a = Validator()
