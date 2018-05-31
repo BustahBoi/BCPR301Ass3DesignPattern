@@ -105,10 +105,7 @@ class CheckBirthday(Strategy):
 
 
 class CheckContext:
-    def __init__(self):
-        self.__strategy = None
-
-    def set_strategy(self, strategy):
+    def __init__(self, strategy):
         self.__strategy = strategy
 
     def check(self, value):
@@ -120,12 +117,22 @@ class Validator:
         self.temp_dict = dict()
         self.valid_dict = dict()
 
+    def checker(self, row):
+        result = False
+        for key, value in row.items():
+            result = self.check(key, value)
+            if result:
+                self.push_value(key, result)
+                result = True
+            else:
+                break
+        return result
+
     def check(self, key, value):
         key = key.lower()
-        context = CheckContext()
         strategy = self.get_strategy(key)
         if strategy:
-            context.set_strategy(strategy)
+            context = CheckContext(strategy)
             result = context.check(value)
             if result:
                 return result
@@ -151,17 +158,6 @@ class Validator:
     def xlsx_date(a_date):
         return a_date.date().strftime("%d-%m-%Y")
 
-    def checker(self, row):
-        result = False
-        for key, value in row.items():
-            result = self.check(key, value)
-            if result:
-                self.push_value(key, result)
-                result = True
-            else:
-                break
-        return result
-
     def save_dict(self, loaded_dict):
         for empno, row in loaded_dict.items():
             b = self.checker(row)
@@ -182,3 +178,4 @@ class Validator:
 
     def return_dict(self):
         return self.valid_dict
+

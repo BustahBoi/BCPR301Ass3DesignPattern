@@ -11,7 +11,6 @@ if __name__ == '__main__':
     graph = Graph()
     prompt = Prompt()
     controller = Controller(prompt, databasehandler, filehandler, graph)
-    # controller.set_subject(prompt)
     prompt.attach(controller)
     controller.start()
 
