@@ -41,9 +41,8 @@ class DBRemote(DatabaseAbstract):
 
     def create_table(self):
         """ Create a table that will be created in the local db
-                    this will store the key and the persons pickled details"""
-        # sqlite3 auto increment is defined as 1 word, not 2 as per usual
+            this will store the key and the persons pickled details"""
         sql = "Create table if not exists employee(empNo integer auto_increment primary key, personal blob)"
         self.cursor.execute(sql)
-        # print("table created")
+
 
