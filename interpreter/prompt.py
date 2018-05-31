@@ -7,18 +7,19 @@ from abc import ABCMeta, abstractmethod
 # Publisher
 class Subject(metaclass=ABCMeta):
     def __init__(self):
-        self.subscriber = list()
+        self.subscribers = list()
         self.command = False
         self.input = None
 
     def attach(self, observer):
-        self.subscriber.add(observer)
+        self.subscribers.append(observer)
 
     def detach(self, observer):
-        self.subscriber.remove(observer)
+        self.subscribers.remove(observer)
 
     def notify(self):
-        self.subscriber.update()
+        for sub in self.subscribers:
+            sub.update()
 
     def set_state(self, command, arg):
         self.command = command

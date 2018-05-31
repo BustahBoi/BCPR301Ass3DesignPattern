@@ -70,7 +70,7 @@ class BarGraph(GraphBuilder):
         self.graph["y"] = self.data["y"][self.y]
 
     def set_data(self):
-        self.graph["data"] = [Bar(x=self.data["x"], y=self.data["y"])]
+        self.graph["data"] = [Bar(x=self.data["x"][self.x], y=self.data["y"][self.y])]
 
     def draw(self):
         offline.plot({"data": self.graph["data"], "layout": self.graph["layout"]}, filename=self.path)
@@ -88,7 +88,7 @@ class ScatterGraph(GraphBuilder):
         self.graph["y"] = self.data["y"][self.y]
 
     def set_data(self):
-        self.graph["data"] = [Scatter(y=self.data["y"], x=self.data["x"])]
+        self.graph["data"] = [Scatter(y=self.data["y"][self.y], x=self.data["x"][self.x])]
 
     def draw(self):
         offline.plot({"data": self.graph["data"], "layout": self.graph["layout"]}, filename=self.path)
