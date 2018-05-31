@@ -10,8 +10,8 @@ if __name__ == '__main__':
     databasehandler = DatabaseHandler()
     graph = Graph()
     prompt = Prompt()
-    controller = Controller(databasehandler, filehandler, graph)
-    controller.set_subject(prompt)
+    controller = Controller(prompt, databasehandler, filehandler, graph)
+    # controller.set_subject(prompt)
     prompt.attach(controller)
     controller.start()
 

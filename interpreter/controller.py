@@ -13,10 +13,6 @@ class Observer(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def set_subject(self, subject):
-        pass
-
-    @abstractmethod
     def get_command(self):
         pass
 
@@ -26,7 +22,7 @@ class Observer(metaclass=ABCMeta):
 
 
 class Controller(Observer):
-    def __init__(self, database, filehandler, graph):
+    def __init__(self, prompt, database, filehandler, graph):
         Observer.__init__(self)
         self.db_handler = database
         self.data = None
@@ -34,10 +30,7 @@ class Controller(Observer):
         self.graph = graph
         self.file = None
         self.directory = path.realpath(path.curdir)
-        self.subject = None
-
-    def set_subject(self, subject):
-        self.subject = subject
+        self.subject = prompt
 
     def start(self):
         self.subject.cmdloop()
